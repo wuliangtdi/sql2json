@@ -38,4 +38,13 @@ public interface IJsonExportService
     /// <param name="options">JSON 格式化选项</param>
     /// <returns>JSON 字符串</returns>
     string Serialize(QueryResult result, JsonExportOptions? options = null);
+
+    /// <summary>
+    /// 将查询结果序列化为 JSON 字符串（限制行数，用于预览）
+    /// </summary>
+    /// <param name="result">查询结果</param>
+    /// <param name="maxRows">最大预览行数</param>
+    /// <param name="options">JSON 格式化选项</param>
+    /// <returns>JSON 字符串</returns>
+    string SerializePreview(QueryResult result, int maxRows, JsonExportOptions? options = null);
 }

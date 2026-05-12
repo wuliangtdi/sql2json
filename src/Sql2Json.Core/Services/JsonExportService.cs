@@ -75,6 +75,8 @@ public class JsonExportService : IJsonExportService
         var jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = options.Indented,
+            // 自定义缩进大小
+            IndentSize = options.IndentSize,
             // 不转义中文字符
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
             // 处理循环引用
@@ -100,5 +102,31 @@ public class JsonExportService : IJsonExportService
         }
 
         return JsonSerializer.Serialize(multiResult, jsonOptions);
+    }
+
+    /// <inheritdoc/>
+    public string SerializePreview(QueryResult result, int maxRows, JsonExportOptions? options = null)
+    {
+        // 构建限制行数的预览结果
+        var previewResult = new QueryResult
+        {
+            ElapsedMilliseconds = result.ElapsedMilliseconds,
+            ResultSets = result.ResultSets.Select(rs => new ResultSet
+            {
+                Index = rs.Index,
+                Columns = rs.Columns,
+                Rows = rs.Rows.Take(maxRows).ToList()
+            }).ToList()
+        };
+
+        var json = Serialize(previewResult, options);
+
+        // 如果有截断，附加提示
+        if (result.TotalRows > maxRows)
+        {
+            json += $"\n\n// 仅显示前 {maxRows} 条，共 {result.TotalRows} 条";
+        }
+
+        return json;
     }
 }

@@ -121,20 +121,20 @@ Sql2Json/
 
 ### 数据库驱动策略
 
-根据用户选择的数据库类型，通过 EF Core 的 `DbContext` 配置对应的 Provider：
+根据用户选择的数据库类型，直接创建对应的 ADO.NET `DbConnection` 执行动态 SQL：
 
-| 数据库类型 | NuGet 包 | EF Core Provider |
-|-----------|----------|------------------|
-| SQL Server | Microsoft.EntityFrameworkCore.SqlServer | UseSqlServer() |
-| MySQL | Pomelo.EntityFrameworkCore.MySql | UseMySql() |
-| PostgreSQL | Npgsql.EntityFrameworkCore.PostgreSQL | UseNpgsql() |
-| Oracle | Oracle.EntityFrameworkCore | UseOracle() |
-| SQLite | Microsoft.EntityFrameworkCore.Sqlite | UseSqlite() |
-| MariaDB | Pomelo.EntityFrameworkCore.MySql (兼容) | UseMySql() |
+| 数据库类型 | NuGet 包 | 连接类型 |
+|-----------|----------|----------|
+| SQL Server | Microsoft.Data.SqlClient 7.0.1 | SqlConnection |
+| MySQL | MySqlConnector 2.5.0 | MySqlConnection |
+| PostgreSQL | Npgsql 10.0.2 | NpgsqlConnection |
+| Oracle | Oracle.ManagedDataAccess.Core 23.26.200 | OracleConnection |
+| SQLite | Microsoft.Data.Sqlite 10.0.7 | SqliteConnection |
+| MariaDB | MySqlConnector 2.5.0（兼容） | MySqlConnection |
 
 #### EF Core 使用方式
 
-1. **动态 SQL 执行**：通过 `DbContext.Database.GetDbConnection()` 获取底层连接，使用 `DbCommand` + `DbDataReader` 执行用户输入的任意 SQL（因为返回结构在编译期未知）
+1. **动态 SQL 执行**：根据数据库类型直接创建对应的 `DbConnection`，使用 `DbCommand` + `DbDataReader` 执行用户输入的任意 SQL（因为返回结构在编译期未知）
 2. **本地数据存储**：使用独立的 `AppDbContext` + SQLite 存储配置信息、查询历史等结构化数据，享受 EF Core 的迁移和 LINQ 能力
 3. **连接生命周期**：每个查询任务创建独立的 `DbContext` 实例，任务完成后释放，支持并发执行
 

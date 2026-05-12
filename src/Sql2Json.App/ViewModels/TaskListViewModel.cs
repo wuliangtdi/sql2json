@@ -56,18 +56,30 @@ public partial class TaskListViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 选中任务变更时，自动加载结果预览
+    /// 选中任务变更时，自动加载结果预览（限制行数）
     /// </summary>
     partial void OnSelectedTaskChanged(QueryTask? value)
     {
         if (value?.Result != null)
         {
-            PreviewJson = _jsonExportService.Serialize(value.Result, new JsonExportOptions { Indented = true });
+            _ = LoadPreviewAsync(value);
         }
         else
         {
             PreviewJson = string.Empty;
         }
+    }
+
+    /// <summary>
+    /// 异步加载预览（读取设置中的最大预览行数）
+    /// </summary>
+    private async Task LoadPreviewAsync(QueryTask task)
+    {
+        var settings = await _configService.GetAppSettingsAsync();
+        PreviewJson = _jsonExportService.SerializePreview(
+            task.Result!,
+            settings.PreviewMaxRows,
+            new JsonExportOptions { Indented = true });
     }
 
     /// <summary>

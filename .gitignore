@@ -31,3 +31,4 @@ TestData/
 
 # Local database
 data/app.db
+.ace-tool/
