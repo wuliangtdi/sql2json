@@ -1,0 +1,161 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            rid: win-x64
+            artifact: Sql2Json-win-x64
+            ext: .exe
+          - os: macos-latest
+            rid: osx-arm64
+            artifact: Sql2Json-osx-arm64
+            ext: ""
+          - os: ubuntu-latest
+            rid: linux-x64
+            artifact: Sql2Json-linux-x64
+            ext: ""
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # 便携版（自包含，免安装）
+      - name: Publish portable
+        run: |
+          dotnet publish src/Sql2Json.App -c Release -r ${{ matrix.rid }} --self-contained true -o publish/portable
+
+      # 打包为 zip
+      - name: Package portable (Windows)
+        if: matrix.os == 'windows-latest'
+        run: Compress-Archive -Path publish/portable/* -DestinationPath ${{ matrix.artifact }}-portable.zip
+        shell: pwsh
+
+      - name: Package portable (Linux/macOS)
+        if: matrix.os != 'windows-latest'
+        run: |
+          chmod +x publish/portable/Sql2Json.App
+          tar -czf ${{ matrix.artifact }}-portable.tar.gz -C publish/portable .
+
+      # Windows 安装版（同样是非单文件、包含框架，打包为单独 zip 方便分发）
+      - name: Create Windows installer
+        if: matrix.os == 'windows-latest'
+        run: |
+          Compress-Archive -Path publish/portable/* -DestinationPath ${{ matrix.artifact }}-installer.zip
+        shell: pwsh
+
+      # macOS .app bundle
+      - name: Create macOS app bundle
+        if: matrix.os == 'macos-latest'
+        run: |
+          mkdir -p Sql2Json.app/Contents/MacOS
+          mkdir -p Sql2Json.app/Contents/Resources
+          cp -r publish/portable/* Sql2Json.app/Contents/MacOS/
+          chmod +x Sql2Json.app/Contents/MacOS/Sql2Json.App
+          cat > Sql2Json.app/Contents/Info.plist << 'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key>
+            <string>Sql2Json</string>
+            <key>CFBundleDisplayName</key>
+            <string>Sql2Json</string>
+            <key>CFBundleIdentifier</key>
+            <string>com.wuliangtdi.sql2json</string>
+            <key>CFBundleVersion</key>
+            <string>1.0.0</string>
+            <key>CFBundleExecutable</key>
+            <string>Sql2Json.App</string>
+            <key>CFBundlePackageType</key>
+            <string>APPL</string>
+            <key>LSMinimumSystemVersion</key>
+            <string>12.0</string>
+            <key>NSHighResolutionCapable</key>
+            <true/>
+          </dict>
+          </plist>
+          PLIST
+          tar -czf ${{ matrix.artifact }}-app.tar.gz Sql2Json.app
+
+      # Linux .deb 包
+      - name: Create Linux deb package
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p deb/DEBIAN
+          mkdir -p deb/usr/lib/sql2json
+          mkdir -p deb/usr/bin
+          mkdir -p deb/usr/share/applications
+          cp -r publish/portable/* deb/usr/lib/sql2json/
+          chmod +x deb/usr/lib/sql2json/Sql2Json.App
+          ln -s /usr/lib/sql2json/Sql2Json.App deb/usr/bin/sql2json
+          cat > deb/DEBIAN/control << 'CTRL'
+          Package: sql2json
+          Version: 1.0.0
+          Section: utils
+          Priority: optional
+          Architecture: amd64
+          Maintainer: wuliangtdi <2296332531@qq.com>
+          Description: SQL query results to JSON export tool
+           A cross-platform desktop tool for executing SQL queries and exporting results as JSON files.
+          CTRL
+          cat > deb/usr/share/applications/sql2json.desktop << 'DESKTOP'
+          [Desktop Entry]
+          Name=Sql2Json
+          Comment=SQL query results to JSON export tool
+          Exec=/usr/bin/sql2json
+          Type=Application
+          Categories=Development;Database;
+          DESKTOP
+          dpkg-deb --build deb ${{ matrix.artifact }}.deb
+
+      # 上传构建产物
+      - name: Upload portable artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}-portable
+          path: |
+            ${{ matrix.artifact }}-portable.zip
+            ${{ matrix.artifact }}-portable.tar.gz
+          if-no-files-found: ignore
+
+      - name: Upload installer artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}-installer
+          path: |
+            ${{ matrix.artifact }}-installer.zip
+            ${{ matrix.artifact }}-app.tar.gz
+            ${{ matrix.artifact }}.deb
+          if-no-files-found: ignore
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/**/*
+          generate_release_notes: true

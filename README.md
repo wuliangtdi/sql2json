@@ -93,10 +93,12 @@ Server=localhost;Port=3306;Database=mydb;User=root;Password=123456;
 Host=localhost;Port=5432;Database=mydb;Username=postgres;Password=123456;
 ```
 
-**SQLite:**
+**SQLite（指你要查询的 SQLite 数据库文件，非应用自身数据）:**
 ```
-Data Source=C:/path/to/database.db;
+Data Source=/path/to/your-database.db;
 ```
+
+> 注：应用自身的配置数据存储在程序目录下的 `data/app.db`，无需手动配置。
 
 ## License
 
