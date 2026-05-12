@@ -13,7 +13,7 @@ public class TaskExecutorService : ITaskExecutorService
     private readonly IDatabaseService _databaseService;
     private readonly IConfigService _configService;
     private readonly IJsonExportService _jsonExportService;
-    private SemaphoreSlim _semaphore;
+    private volatile SemaphoreSlim _semaphore;
     private int _maxConcurrency;
 
     public TaskExecutorService(IDatabaseService databaseService, IConfigService configService, IJsonExportService jsonExportService)
@@ -36,14 +36,11 @@ public class TaskExecutorService : ITaskExecutorService
     /// <inheritdoc/>
     public void Cancel(Guid taskId)
     {
-        // 取消操作通过 QueryTask 自身的 CancellationTokenSource 实现
-        // 由 ViewModel 层持有任务引用并调用
     }
 
     /// <inheritdoc/>
     public void CancelAll()
     {
-        // 由 ViewModel 层遍历所有任务并逐个取消
     }
 
     /// <inheritdoc/>
@@ -51,32 +48,31 @@ public class TaskExecutorService : ITaskExecutorService
     {
         if (maxConcurrency <= 0) return;
         _maxConcurrency = maxConcurrency;
-        // 重建信号量（已在执行的任务不受影响，新任务使用新的并发限制）
+        // 新建信号量供后续任务使用，已在执行的任务持有旧信号量的局部引用不受影响
         _semaphore = new SemaphoreSlim(maxConcurrency);
     }
 
     /// <summary>
     /// 在后台执行单个查询任务
-    /// 通过 SemaphoreSlim 控制并发数，确保不会同时打开过多数据库连接
+    /// 捕获局部 semaphore 引用，确保 wait 和 release 操作同一个实例
     /// </summary>
-    /// <param name="task">要执行的查询任务</param>
     private async Task ExecuteTaskAsync(QueryTask task)
     {
+        // 捕获当前信号量引用，确保 wait/release 操作同一个实例
+        var semaphore = _semaphore;
+
         try
         {
-            // 等待信号量（如果已达到最大并发数，则排队等待）
             task.Status = QueryTaskStatus.Pending;
             task.ProgressMessage = "等待执行槽位...";
 
-            await _semaphore.WaitAsync(task.CancellationTokenSource.Token);
+            await semaphore.WaitAsync(task.CancellationTokenSource.Token);
 
             try
             {
-                // 获取信号量成功，开始执行
                 task.Status = QueryTaskStatus.Running;
                 task.ProgressMessage = "正在连接数据库...";
 
-                // 获取数据库配置
                 var dbConfig = await _configService.GetDatabaseConfigAsync(task.DatabaseConfigId);
                 if (dbConfig == null)
                 {
@@ -87,14 +83,12 @@ public class TaskExecutorService : ITaskExecutorService
 
                 task.ProgressMessage = "正在执行查询...";
 
-                // 执行 SQL 查询
                 var result = await _databaseService.ExecuteQueryAsync(
                     dbConfig,
                     task.Sql,
                     task.Parameters,
                     task.CancellationTokenSource.Token);
 
-                // 执行成功，更新任务状态
                 task.Result = result;
                 task.ElapsedMilliseconds = result.ElapsedMilliseconds;
 
@@ -115,8 +109,8 @@ public class TaskExecutorService : ITaskExecutorService
             }
             finally
             {
-                // 无论成功失败，都要释放信号量
-                _semaphore.Release();
+                // 释放的是同一个 semaphore 实例
+                semaphore.Release();
             }
         }
         catch (OperationCanceledException)

@@ -172,7 +172,7 @@ Sql2Json/
 
 #### 优势：
 - 结构化存储，支持复杂查询
-- EF Core Migration 管理 schema 变更
+- EnsureCreated() 自动建表，桌面应用无需手动迁移
 - 事务支持，数据一致性有保障
 - 比手动读写 JSON 文件更健壮
 
@@ -262,16 +262,15 @@ Sql2Json/
 
 ### 为什么用 EF Core？
 
-1. **动态 SQL 执行**：通过 `DbContext.Database.GetDbConnection()` 获取连接，用 `DbDataReader` 读取未知结构的结果集。虽然动态 SQL 无法利用 EF Core 的实体映射，但 EF Core 统一管理连接创建、Provider 切换、连接字符串配置
-2. **本地数据管理**：配置信息、查询历史用 SQLite + EF Core 存储，享受 Migration、LINQ、强类型查询的便利
-3. **Provider 统一切换**：通过 EF Core 的 Provider 体系，一套代码支持多种数据库，切换数据库只需更换 `UseXxx()` 调用
+1. **本地数据管理**：配置信息、查询历史用 SQLite + EF Core 存储，享受 LINQ、强类型查询的便利
+2. **动态 SQL 执行**：用户查询目标数据库时，直接根据数据库类型创建对应的 ADO.NET `DbConnection`（SqlConnection/MySqlConnection/NpgsqlConnection 等），用 `DbCommand` + `DbDataReader` 执行任意 SQL
 
 ### 为什么用 SemaphoreSlim 控制并发？
 
 任务队列支持多任务同时执行，但需要限制最大并发数：
 - 避免同时打开过多数据库连接耗尽连接池
 - 避免目标数据库压力过大
-- 每个任务独立 DbContext，无共享状态，天然线程安全
+- 每个任务捕获局部 semaphore 引用，确保 wait/release 操作同一实例
 
 ### 多结果集处理策略
 

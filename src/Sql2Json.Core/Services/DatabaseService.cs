@@ -52,11 +52,24 @@ public class DatabaseService : IDatabaseService
         {
             var resultSet = new ResultSet { Index = resultSetIndex };
 
-            // 读取列信息
+            // 读取列信息，处理重复列名（JOIN 时常见）
+            var columnNames = new List<string>();
+            var nameCount = new Dictionary<string, int>();
             for (var i = 0; i < reader.FieldCount; i++)
             {
-                resultSet.Columns.Add(reader.GetName(i));
+                var name = reader.GetName(i);
+                if (nameCount.TryGetValue(name, out var count))
+                {
+                    nameCount[name] = count + 1;
+                    name = $"{name}_{count + 1}";
+                }
+                else
+                {
+                    nameCount[name] = 1;
+                }
+                columnNames.Add(name);
             }
+            resultSet.Columns = columnNames;
 
             // 读取所有行数据
             while (await reader.ReadAsync(cancellationToken))
@@ -64,9 +77,8 @@ public class DatabaseService : IDatabaseService
                 var row = new Dictionary<string, object?>();
                 for (var i = 0; i < reader.FieldCount; i++)
                 {
-                    var columnName = reader.GetName(i);
                     var value = reader.IsDBNull(i) ? null : reader.GetValue(i);
-                    row[columnName] = value;
+                    row[columnNames[i]] = value;
                 }
                 resultSet.Rows.Add(row);
             }

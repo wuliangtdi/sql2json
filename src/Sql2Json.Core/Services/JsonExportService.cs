@@ -24,11 +24,29 @@ public class JsonExportService : IJsonExportService
         // 确保输出目录存在
         Directory.CreateDirectory(folderPath);
 
+        // 安全校验：只允许纯文件名，拒绝路径分隔符和非法字符
+        var invalidChars = Path.GetInvalidFileNameChars();
+        var sanitizedFileName = fileName.Trim();
+        if (sanitizedFileName.Any(c => invalidChars.Contains(c)) ||
+            sanitizedFileName.Contains("..") ||
+            Path.IsPathRooted(sanitizedFileName))
+        {
+            throw new ArgumentException($"文件名包含非法字符: {sanitizedFileName}");
+        }
+
         // 拼接完整文件路径（自动补 .json 扩展名）
-        var fullFileName = fileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
-            ? fileName
-            : $"{fileName}.json";
+        var fullFileName = sanitizedFileName.EndsWith(".json", StringComparison.OrdinalIgnoreCase)
+            ? sanitizedFileName
+            : $"{sanitizedFileName}.json";
         var filePath = Path.Combine(folderPath, fullFileName);
+
+        // 二次校验：确保最终路径在目标文件夹内
+        var resolvedPath = Path.GetFullPath(filePath);
+        var resolvedFolder = Path.GetFullPath(folderPath);
+        if (!resolvedPath.StartsWith(resolvedFolder, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException($"文件路径逃逸了目标文件夹: {resolvedPath}");
+        }
 
         // 序列化为 JSON 字符串
         var json = Serialize(result, options);
@@ -119,14 +137,7 @@ public class JsonExportService : IJsonExportService
             }).ToList()
         };
 
-        var json = Serialize(previewResult, options);
-
-        // 如果有截断，附加提示
-        if (result.TotalRows > maxRows)
-        {
-            json += $"\n\n// 仅显示前 {maxRows} 条，共 {result.TotalRows} 条";
-        }
-
-        return json;
+        // 返回纯 JSON，不附加非 JSON 内容
+        return Serialize(previewResult, options);
     }
 }

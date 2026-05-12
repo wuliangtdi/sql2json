@@ -71,15 +71,29 @@ public partial class TaskListViewModel : ObservableObject
     }
 
     /// <summary>
-    /// 异步加载预览（读取设置中的最大预览行数）
+    /// 异步加载预览（使用完整的用户 JSON 格式设置，并限制行数）
     /// </summary>
     private async Task LoadPreviewAsync(QueryTask task)
     {
         var settings = await _configService.GetAppSettingsAsync();
+        var options = new JsonExportOptions
+        {
+            Indented = settings.JsonIndented,
+            UseBom = settings.JsonUseBom,
+            IndentSize = settings.JsonIndentSize,
+            CamelCasePropertyNames = settings.JsonCamelCase
+        };
+
         PreviewJson = _jsonExportService.SerializePreview(
             task.Result!,
             settings.PreviewMaxRows,
-            new JsonExportOptions { Indented = true });
+            options);
+
+        // 截断提示显示在状态栏
+        if (task.Result!.TotalRows > settings.PreviewMaxRows)
+        {
+            StatusMessage = $"预览仅显示前 {settings.PreviewMaxRows} 条，共 {task.Result.TotalRows} 条";
+        }
     }
 
     /// <summary>

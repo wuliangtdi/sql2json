@@ -21,7 +21,10 @@
       "Bash(git remote *)",
       "Bash(git branch *)",
       "Bash(git push *)",
-      "Bash(grep -E \"^\\\\\\\\| Npgsql\\\\s\")"
+      "Bash(grep -E \"^\\\\\\\\| Npgsql\\\\s\")",
+      "Bash(taskkill //F //PID 38892)",
+      "Bash(taskkill //F //PID 105920)",
+      "Bash(taskkill //F //PID 136196)"
     ]
   }
 }
