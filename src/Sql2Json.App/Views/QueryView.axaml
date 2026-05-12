@@ -1,0 +1,151 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Sql2Json.App.ViewModels"
+             x:Class="Sql2Json.App.Views.QueryView"
+             x:DataType="vm:QueryViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+        <!-- Row 0: 标题 -->
+        <TextBlock Grid.Row="0" Text="SQL 查询" FontSize="18" FontWeight="Bold"
+                   Margin="0,0,0,14" />
+
+        <!-- Row 1: 数据库 + 文件夹 + 文件名（紧凑排列） -->
+        <StackPanel Grid.Row="1" Spacing="10" Margin="0,0,0,12">
+            <!-- 数据库选择 -->
+            <StackPanel Spacing="3">
+                <TextBlock Text="数据库" FontSize="11" FontWeight="Medium" Opacity="0.6" />
+                <ComboBox ItemsSource="{Binding DatabaseConfigs}"
+                          SelectedItem="{Binding SelectedDatabase}"
+                          HorizontalAlignment="Stretch"
+                          PlaceholderText="选择目标数据库">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <TextBlock Text="{Binding Name}" />
+                                <TextBlock Text="{Binding DatabaseType, StringFormat='[{0}]'}"
+                                           FontSize="11" Opacity="0.5" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+
+            <!-- 文件夹 + 文件名 横排 -->
+            <Grid ColumnDefinitions="*,12,*">
+                <StackPanel Grid.Column="0" Spacing="3">
+                    <TextBlock Text="输出文件夹" FontSize="11" FontWeight="Medium" Opacity="0.6" />
+                    <ComboBox ItemsSource="{Binding FolderConfigs}"
+                              SelectedItem="{Binding SelectedFolder}"
+                              HorizontalAlignment="Stretch"
+                              PlaceholderText="选择输出目录">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Spacing="3">
+                    <TextBlock Text="文件名" FontSize="11" FontWeight="Medium" Opacity="0.6" />
+                    <DockPanel>
+                        <Border DockPanel.Dock="Right" Padding="8,0"
+                                Background="{DynamicResource SemiColorFillTertiary}"
+                                CornerRadius="0,4,4,0" VerticalAlignment="Stretch">
+                            <TextBlock Text=".json" VerticalAlignment="Center" Opacity="0.5"
+                                       FontSize="12" />
+                        </Border>
+                        <TextBox Text="{Binding FileName}" PlaceholderText="文件名（必填）" />
+                    </DockPanel>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- Row 2: SQL 标签 -->
+        <TextBlock Grid.Row="2" Text="SQL 语句" FontSize="11" FontWeight="Medium"
+                   Opacity="0.6" Margin="0,0,0,4" />
+
+        <!-- Row 3: SQL 输入框（占满剩余空间） -->
+        <TextBox Grid.Row="3"
+                 Text="{Binding SqlText}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Stretch"
+                 VerticalContentAlignment="Top"
+                 PlaceholderText="输入 SQL 语句，支持多个 SELECT（分号分隔）&#x0a;支持参数化查询：SELECT * FROM Users WHERE Id = @id"
+                 FontFamily="Cascadia Code, Consolas, 'Courier New', monospace"
+                 FontSize="13"
+                 Margin="0,0,0,10" />
+
+        <!-- Row 4: 参数区域 -->
+        <StackPanel Grid.Row="4" Spacing="4" Margin="0,0,0,12">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Left" Text="查询参数" FontSize="11"
+                           FontWeight="Medium" Opacity="0.6" VerticalAlignment="Center" />
+                <Button DockPanel.Dock="Right" Content="+ 添加"
+                        Command="{Binding AddParameterCommand}"
+                        Classes="Tertiary" FontSize="11" Padding="8,3" />
+                <Panel />
+            </DockPanel>
+
+            <ItemsControl ItemsSource="{Binding Parameters}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Margin="0,2" Padding="8,5" CornerRadius="4"
+                                Background="{DynamicResource SemiColorFillQuaternary}">
+                            <Grid ColumnDefinitions="110,8,*,8,Auto">
+                                <TextBox Grid.Column="0" Text="{Binding Name}"
+                                         PlaceholderText="@参数名" FontSize="12"
+                                         FontFamily="Cascadia Code, Consolas, monospace" />
+                                <TextBox Grid.Column="2" Text="{Binding Value}"
+                                         PlaceholderText="值" FontSize="12" />
+                                <Button Grid.Column="4" Content="✕" Padding="6,2"
+                                        Classes="Tertiary" FontSize="11"
+                                        Command="{Binding $parent[ItemsControl].((vm:QueryViewModel)DataContext).RemoveParameterCommand}"
+                                        CommandParameter="{Binding}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <!-- Row 5: 底部操作栏 -->
+        <StackPanel Grid.Row="5" Spacing="8">
+            <!-- 验证错误 -->
+            <Border IsVisible="{Binding ValidationError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                    Background="#FFF0F0" CornerRadius="6" Padding="10,6">
+                <TextBlock Text="{Binding ValidationError}" Foreground="#E53E3E" FontSize="12" />
+            </Border>
+
+            <!-- 执行按钮 -->
+            <Button Content="▶  执行并加入队列"
+                    Command="{Binding ExecuteQueryCommand}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Classes="Primary"
+                    Padding="0,11"
+                    FontSize="14" FontWeight="Medium" />
+
+            <!-- 辅助操作 -->
+            <Grid ColumnDefinitions="*,*">
+                <Button Grid.Column="0" Content="💾 保存到历史"
+                        Command="{Binding SaveToHistoryCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Margin="0,0,4,0" Padding="0,7" FontSize="12" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding QueryHistories}"
+                          SelectedItem="{Binding SelectedHistory}"
+                          HorizontalAlignment="Stretch"
+                          Margin="4,0,0,0"
+                          PlaceholderText="📋 历史查询">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Name}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
+        </StackPanel>
+    </Grid>
+
+</UserControl>

@@ -1,0 +1,126 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Sql2Json.App.ViewModels"
+             x:Class="Sql2Json.App.Views.DatabaseConfigView"
+             x:DataType="vm:DatabaseConfigViewModel">
+
+    <Grid ColumnDefinitions="240,20,*">
+        <!-- 左侧：配置列表 -->
+        <DockPanel Grid.Column="0">
+            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="6" Margin="0,12,0,0">
+                <Button Content="+ 新增" Command="{Binding StartAddCommand}"
+                        Classes="Primary" FontSize="12" Padding="12,6" />
+                <Button Content="删除" Command="{Binding DeleteCommand}"
+                        Classes="Tertiary" FontSize="12" Padding="10,6" />
+            </StackPanel>
+
+            <Border CornerRadius="6" BorderThickness="1"
+                    BorderBrush="{DynamicResource SemiColorBorder}" ClipToBounds="True">
+                <ListBox ItemsSource="{Binding Configs}"
+                         SelectedItem="{Binding SelectedConfig}"
+                         Background="Transparent">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Margin="4,6">
+                                <TextBlock Text="{Binding Name}" FontWeight="Medium" FontSize="13" />
+                                <TextBlock Text="{Binding DatabaseType}" FontSize="11" Opacity="0.5" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+        </DockPanel>
+
+        <!-- 右侧：编辑表单（编辑模式） -->
+        <Border Grid.Column="2" IsVisible="{Binding IsEditing}"
+                Padding="24" CornerRadius="8"
+                Background="{DynamicResource SemiColorFillQuaternary}">
+            <StackPanel Spacing="14">
+                <TextBlock Text="编辑数据库配置" FontSize="15" FontWeight="Medium" />
+
+                <!-- 名称 -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="配置名称" FontSize="11" FontWeight="Medium" Opacity="0.6" />
+                    <TextBox Text="{Binding EditName}" PlaceholderText="如：生产库-订单系统" />
+                </StackPanel>
+
+                <!-- 数据库类型 -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="数据库类型" FontSize="11" FontWeight="Medium" Opacity="0.6" />
+                    <ComboBox ItemsSource="{Binding AvailableDatabaseTypes}"
+                              SelectedItem="{Binding EditDatabaseType}"
+                              HorizontalAlignment="Stretch" />
+                </StackPanel>
+
+                <!-- 连接字符串 -->
+                <StackPanel Spacing="4">
+                    <TextBlock Text="连接字符串" FontSize="11" FontWeight="Medium" Opacity="0.6" />
+                    <TextBox Text="{Binding EditConnectionString}"
+                             AcceptsReturn="True" MinHeight="80"
+                             FontFamily="Cascadia Code, Consolas, monospace" FontSize="12"
+                             PlaceholderText="Server=localhost;Database=mydb;User Id=sa;Password=***;TrustServerCertificate=True;" />
+                </StackPanel>
+
+                <!-- 测试连接结果 -->
+                <Border IsVisible="{Binding TestResultMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                        Padding="12,8" CornerRadius="6"
+                        Background="{DynamicResource SemiColorFillTertiary}">
+                    <TextBlock Text="{Binding TestResultMessage}" FontSize="12" />
+                </Border>
+
+                <!-- 操作按钮 -->
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,6,0,0">
+                    <Button Content="保存" Command="{Binding SaveCommand}"
+                            Classes="Primary" Padding="20,8" />
+                    <Button Content="🔌 测试连接" Command="{Binding TestConnectionCommand}"
+                            Padding="16,8" />
+                    <Button Content="取消" Command="{Binding CancelEditCommand}"
+                            Classes="Tertiary" Padding="16,8" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- 右侧：详情展示（非编辑模式，有选中项时） -->
+        <Border Grid.Column="2"
+                IsVisible="{Binding !IsEditing}"
+                Padding="24" CornerRadius="8"
+                Background="{DynamicResource SemiColorFillQuaternary}">
+            <Panel>
+                <!-- 有选中项时显示详情 -->
+                <StackPanel Spacing="14"
+                            IsVisible="{Binding SelectedConfig, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <DockPanel>
+                        <TextBlock DockPanel.Dock="Left" Text="{Binding SelectedConfig.Name}"
+                                   FontSize="16" FontWeight="Bold" VerticalAlignment="Center" />
+                        <Button DockPanel.Dock="Right" Content="编辑"
+                                Command="{Binding StartEditCommand}"
+                                Classes="Primary" Padding="14,6" FontSize="12" />
+                        <Panel />
+                    </DockPanel>
+
+                    <StackPanel Spacing="10">
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="数据库类型" FontSize="11" Opacity="0.5" />
+                            <TextBlock Text="{Binding SelectedConfig.DatabaseType}" FontSize="14" />
+                        </StackPanel>
+                        <StackPanel Spacing="2">
+                            <TextBlock Text="连接字符串" FontSize="11" Opacity="0.5" />
+                            <TextBox Text="{Binding SelectedConfig.ConnectionString}"
+                                     IsReadOnly="True" AcceptsReturn="True"
+                                     FontFamily="Cascadia Code, Consolas, monospace"
+                                     FontSize="12" MinHeight="60"
+                                     Background="Transparent" BorderThickness="0" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- 无选中项时的占位提示 -->
+                <TextBlock IsVisible="{Binding SelectedConfig, Converter={x:Static ObjectConverters.IsNull}}"
+                           Text="选择左侧配置查看详情，或点击「新增」添加数据库"
+                           Opacity="0.4" FontSize="13"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Panel>
+        </Border>
+    </Grid>
+
+</UserControl>

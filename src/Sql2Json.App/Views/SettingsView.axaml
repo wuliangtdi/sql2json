@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Sql2Json.App.ViewModels"
+             x:Class="Sql2Json.App.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <ScrollViewer>
+        <StackPanel Spacing="20" MaxWidth="450">
+            <!-- JSON 格式选项 -->
+            <StackPanel Spacing="10">
+                <TextBlock Text="JSON 导出格式" FontSize="14" FontWeight="Medium" />
+                <Border Padding="16" CornerRadius="8"
+                        Background="{DynamicResource SemiColorFillQuaternary}">
+                    <StackPanel Spacing="10">
+                        <CheckBox Content="格式化缩进（美化输出）" IsChecked="{Binding JsonIndented}" />
+                        <CheckBox Content="使用 UTF-8 BOM 编码" IsChecked="{Binding JsonUseBom}" />
+                        <CheckBox Content="属性名转驼峰命名 (camelCase)" IsChecked="{Binding JsonCamelCase}" />
+                        <DockPanel Margin="0,4,0,0">
+                            <TextBlock DockPanel.Dock="Left" Text="缩进字符数"
+                                       VerticalAlignment="Center" FontSize="13" />
+                            <NumericUpDown DockPanel.Dock="Right" Value="{Binding JsonIndentSize}"
+                                           Minimum="1" Maximum="8" Width="100" />
+                            <Panel />
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- 执行选项 -->
+            <StackPanel Spacing="10">
+                <TextBlock Text="执行选项" FontSize="14" FontWeight="Medium" />
+                <Border Padding="16" CornerRadius="8"
+                        Background="{DynamicResource SemiColorFillQuaternary}">
+                    <StackPanel Spacing="12">
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="最大并发数"
+                                       VerticalAlignment="Center" FontSize="13" />
+                            <NumericUpDown DockPanel.Dock="Right" Value="{Binding MaxConcurrency}"
+                                           Minimum="1" Maximum="20" Width="100" />
+                            <Panel />
+                        </DockPanel>
+                        <DockPanel>
+                            <TextBlock DockPanel.Dock="Left" Text="预览最大行数"
+                                       VerticalAlignment="Center" FontSize="13" />
+                            <NumericUpDown DockPanel.Dock="Right" Value="{Binding PreviewMaxRows}"
+                                           Minimum="10" Maximum="1000" Increment="10" Width="100" />
+                            <Panel />
+                        </DockPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- 保存 -->
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button Content="保存设置" Command="{Binding SaveCommand}"
+                        Classes="Primary" Padding="20,10" />
+                <TextBlock Text="{Binding SaveMessage}" VerticalAlignment="Center"
+                           IsVisible="{Binding SaveMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                           Foreground="Green" FontSize="12" />
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+
+</UserControl>

@@ -1,0 +1,106 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Sql2Json.App.ViewModels"
+             xmlns:models="using:Sql2Json.Core.Models"
+             xmlns:converters="using:Sql2Json.App.Converters"
+             x:Class="Sql2Json.App.Views.TaskListView"
+             x:DataType="vm:TaskListViewModel">
+
+    <UserControl.Resources>
+        <converters:TaskStatusConverter x:Key="TaskStatusConverter" />
+        <converters:TaskStatusColorConverter x:Key="TaskStatusColorConverter" />
+    </UserControl.Resources>
+
+    <DockPanel>
+        <!-- 标题栏 -->
+        <DockPanel DockPanel.Dock="Top" Margin="0,0,0,12">
+            <TextBlock DockPanel.Dock="Left" Text="任务队列" FontSize="16" FontWeight="Bold"
+                       VerticalAlignment="Center" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" Spacing="6">
+                <Button Content="📦 批量导出" Command="{Binding BatchExportCommand}"
+                        Classes="Tertiary" FontSize="12" Padding="10,5" />
+                <Button Content="🧹 清除" Command="{Binding ClearCompletedCommand}"
+                        Classes="Tertiary" FontSize="12" Padding="10,5" />
+            </StackPanel>
+            <Panel />
+        </DockPanel>
+
+        <!-- 底部状态栏 -->
+        <Border DockPanel.Dock="Bottom" Padding="8,8,8,0" Margin="0,8,0,0">
+            <TextBlock Text="{Binding StatusMessage}" FontSize="11" Opacity="0.5" />
+        </Border>
+
+        <!-- 中间：任务列表 + 预览 -->
+        <Grid RowDefinitions="*,Auto,*">
+            <!-- 任务列表 -->
+            <Border Grid.Row="0" CornerRadius="6" BorderThickness="1"
+                    BorderBrush="{DynamicResource SemiColorBorder}"
+                    ClipToBounds="True">
+                <ListBox ItemsSource="{Binding Tasks}"
+                         SelectedItem="{Binding SelectedTask}"
+                         Background="Transparent">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="models:QueryTask">
+                            <DockPanel Margin="4,6">
+                                <!-- 状态图标 -->
+                                <Border DockPanel.Dock="Left" Width="28" Height="28"
+                                        CornerRadius="14" Margin="0,0,10,0"
+                                        VerticalAlignment="Center"
+                                        Background="{DynamicResource SemiColorFillQuaternary}">
+                                    <TextBlock Text="{Binding Status, Converter={StaticResource TaskStatusConverter}}"
+                                               FontSize="14" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"
+                                               Foreground="{Binding Status, Converter={StaticResource TaskStatusColorConverter}}" />
+                                </Border>
+                                <!-- 任务信息 -->
+                                <StackPanel VerticalAlignment="Center">
+                                    <DockPanel>
+                                        <TextBlock Text="{Binding FileName, StringFormat='{}{0}.json'}"
+                                                   FontWeight="Medium" FontSize="13" />
+                                        <TextBlock DockPanel.Dock="Right"
+                                                   Text="{Binding DatabaseName}"
+                                                   FontSize="10" Opacity="0.4"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Right" />
+                                    </DockPanel>
+                                    <TextBlock Text="{Binding ProgressMessage}"
+                                               FontSize="11" Margin="0,2,0,0"
+                                               Foreground="{Binding Status, Converter={StaticResource TaskStatusColorConverter}}" />
+                                </StackPanel>
+                            </DockPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Border>
+
+            <!-- 操作按钮行 -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6" Margin="0,8">
+                <Button Content="导出选中" Command="{Binding ExportSelectedCommand}"
+                        Classes="Primary" FontSize="12" Padding="12,6" />
+                <Button Content="取消" Command="{Binding CancelSelectedCommand}"
+                        Classes="Tertiary" FontSize="12" Padding="10,6" />
+                <Button Content="移除" Command="{Binding RemoveSelectedCommand}"
+                        Classes="Tertiary" FontSize="12" Padding="10,6" />
+            </StackPanel>
+
+            <!-- 结果预览 -->
+            <DockPanel Grid.Row="2">
+                <TextBlock DockPanel.Dock="Top" Text="结果预览" FontSize="13"
+                           FontWeight="Medium" Opacity="0.7" Margin="0,0,0,6" />
+                <Border CornerRadius="6" BorderThickness="1"
+                        BorderBrush="{DynamicResource SemiColorBorder}"
+                        ClipToBounds="True">
+                    <TextBox Text="{Binding PreviewJson}"
+                             IsReadOnly="True"
+                             AcceptsReturn="True"
+                             TextWrapping="NoWrap"
+                             FontFamily="Cascadia Code, Consolas, 'Courier New', monospace"
+                             FontSize="12"
+                             Background="{DynamicResource SemiColorFillQuaternary}"
+                             PlaceholderText="选择已完成的任务查看 JSON 预览..." />
+                </Border>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+
+</UserControl>

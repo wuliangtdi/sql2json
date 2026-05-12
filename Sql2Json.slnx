@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Sql2Json.App/Sql2Json.App.csproj" />
+    <Project Path="src/Sql2Json.Core/Sql2Json.Core.csproj" />
+  </Folder>
+</Solution>

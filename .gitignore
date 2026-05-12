@@ -1,0 +1,33 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+publish/
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# IDE
+.idea/
+.vs/
+*.swp
+
+# NuGet
+**/packages/
+*.nupkg
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test data (screenshots)
+TestData/
+
+# Local database
+data/app.db
