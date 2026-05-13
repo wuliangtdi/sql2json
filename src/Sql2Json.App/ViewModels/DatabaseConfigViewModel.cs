@@ -56,6 +56,12 @@ public partial class DatabaseConfigViewModel : ObservableObject
     private string _editConnectionString = string.Empty;
 
     /// <summary>
+    /// 编辑中的命令超时时间（秒）
+    /// </summary>
+    [ObservableProperty]
+    private int _editCommandTimeout = 300;
+
+    /// <summary>
     /// 连接测试结果信息
     /// </summary>
     [ObservableProperty]
@@ -104,6 +110,7 @@ public partial class DatabaseConfigViewModel : ObservableObject
         EditName = string.Empty;
         EditDatabaseType = DatabaseType.SqlServer;
         EditConnectionString = string.Empty;
+        EditCommandTimeout = 300;
         TestResultMessage = null;
         IsEditing = true;
     }
@@ -120,6 +127,7 @@ public partial class DatabaseConfigViewModel : ObservableObject
         EditName = SelectedConfig.Name;
         EditDatabaseType = SelectedConfig.DatabaseType;
         EditConnectionString = SelectedConfig.ConnectionString;
+        EditCommandTimeout = SelectedConfig.CommandTimeout;
         TestResultMessage = null;
         IsEditing = true;
     }
@@ -142,7 +150,8 @@ public partial class DatabaseConfigViewModel : ObservableObject
             {
                 Name = EditName.Trim(),
                 DatabaseType = EditDatabaseType,
-                ConnectionString = EditConnectionString.Trim()
+                ConnectionString = EditConnectionString.Trim(),
+                CommandTimeout = EditCommandTimeout
             };
             await _configService.AddDatabaseConfigAsync(config);
             savedId = config.Id;
@@ -156,7 +165,8 @@ public partial class DatabaseConfigViewModel : ObservableObject
                 Id = savedId,
                 Name = EditName.Trim(),
                 DatabaseType = EditDatabaseType,
-                ConnectionString = EditConnectionString.Trim()
+                ConnectionString = EditConnectionString.Trim(),
+                CommandTimeout = EditCommandTimeout
             };
             await _configService.UpdateDatabaseConfigAsync(config);
         }

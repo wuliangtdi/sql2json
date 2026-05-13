@@ -33,7 +33,7 @@ public class DatabaseService : IDatabaseService
 
         await using var command = connection.CreateCommand();
         command.CommandText = sql;
-        command.CommandTimeout = 300; // 5 分钟超时
+        command.CommandTimeout = config.CommandTimeout;
 
         // 绑定参数化查询的参数
         foreach (var param in parameters)

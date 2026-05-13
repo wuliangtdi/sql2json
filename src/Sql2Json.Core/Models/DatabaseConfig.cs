@@ -30,6 +30,11 @@ public class DatabaseConfig
     public string ConnectionString { get; set; } = string.Empty;
 
     /// <summary>
+    /// 命令执行超时时间（秒），0 表示不限时
+    /// </summary>
+    public int CommandTimeout { get; set; } = 300;
+
+    /// <summary>
     /// 创建时间
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.Now;
