@@ -50,6 +50,11 @@ public partial class QueryTask : ObservableObject
     public string FolderPath { get; set; } = string.Empty;
 
     /// <summary>
+    /// 导出格式（Json / Csv / Excel）
+    /// </summary>
+    public ExportFormat ExportFormat { get; set; } = ExportFormat.Json;
+
+    /// <summary>
     /// 任务创建时间
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.Now;

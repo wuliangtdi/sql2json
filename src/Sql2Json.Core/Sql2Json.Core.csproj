@@ -21,6 +21,9 @@
 
     <!-- MVVM -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+
+    <!-- Excel 导出 -->
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
   </ItemGroup>
 
 </Project>

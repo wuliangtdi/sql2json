@@ -8,6 +8,11 @@ namespace Sql2Json.Core.Services;
 public interface ITaskExecutorService
 {
     /// <summary>
+    /// 任务完成时触发（成功或失败），用于通知 UI 层
+    /// </summary>
+    event Action<QueryTask>? TaskCompleted;
+
+    /// <summary>
     /// 提交任务到执行器，立即开始执行（受并发数限制）
     /// </summary>
     /// <param name="task">要执行的查询任务</param>

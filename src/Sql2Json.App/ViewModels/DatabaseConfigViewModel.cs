@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Sql2Json.App.ViewModels.Messages;
+using Sql2Json.Core.Helpers;
 using Sql2Json.Core.Enums;
 using Sql2Json.Core.Models;
 using Sql2Json.Core.Services;
@@ -99,6 +100,30 @@ public partial class DatabaseConfigViewModel : ObservableObject
     }
 
     /// <summary>
+    /// 编辑中切换数据库类型时，如果连接字符串为空或仍是模板，自动填充新类型的模板
+    /// </summary>
+    partial void OnEditDatabaseTypeChanged(DatabaseType value)
+    {
+        if (!IsEditing) return;
+
+        // 仅在新增模式（_editingId == null）且连接字符串为空或是某个模板时才自动填充
+        if (_editingId == null && string.IsNullOrWhiteSpace(EditConnectionString))
+        {
+            EditConnectionString = ConnectionStringTemplates.GetTemplate(value);
+            return;
+        }
+
+        // 如果当前内容是某个模板（用户没改过），也替换为新模板
+        var allTemplates = Enum.GetValues<DatabaseType>()
+            .Select(ConnectionStringTemplates.GetTemplate)
+            .Where(t => !string.IsNullOrEmpty(t));
+        if (allTemplates.Contains(EditConnectionString))
+        {
+            EditConnectionString = ConnectionStringTemplates.GetTemplate(value);
+        }
+    }
+
+    /// <summary>
     /// 加载所有数据库配置
     /// </summary>
     public async Task LoadAsync()
@@ -118,7 +143,7 @@ public partial class DatabaseConfigViewModel : ObservableObject
         _editingId = null;
         EditName = string.Empty;
         EditDatabaseType = DatabaseType.SqlServer;
-        EditConnectionString = string.Empty;
+        EditConnectionString = ConnectionStringTemplates.GetTemplate(DatabaseType.SqlServer);
         EditCommandTimeout = 300;
         TestResultMessage = null;
         IsEditing = true;

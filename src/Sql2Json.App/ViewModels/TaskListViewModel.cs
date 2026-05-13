@@ -15,6 +15,7 @@ public partial class TaskListViewModel : ObservableObject
 {
     private readonly IJsonExportService _jsonExportService;
     private readonly IConfigService _configService;
+    private readonly ITaskExecutorService _taskExecutorService;
 
     /// <summary>
     /// 所有查询任务列表（按创建时间倒序）
@@ -39,10 +40,11 @@ public partial class TaskListViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = "就绪";
 
-    public TaskListViewModel(IJsonExportService jsonExportService, IConfigService configService)
+    public TaskListViewModel(IJsonExportService jsonExportService, IConfigService configService, ITaskExecutorService taskExecutorService)
     {
         _jsonExportService = jsonExportService;
         _configService = configService;
+        _taskExecutorService = taskExecutorService;
     }
 
     /// <summary>
@@ -168,6 +170,33 @@ public partial class TaskListViewModel : ObservableObject
             SelectedTask.CancellationTokenSource.Cancel();
             StatusMessage = $"已取消任务: {SelectedTask.FileName}";
         }
+    }
+
+    /// <summary>
+    /// 重试失败的任务（复制原任务信息创建新任务重新执行）
+    /// </summary>
+    [RelayCommand]
+    private async Task RetrySelectedAsync()
+    {
+        if (SelectedTask == null) return;
+        if (SelectedTask.Status is not (QueryTaskStatus.Failed or QueryTaskStatus.Cancelled)) return;
+
+        // 从失败任务复制信息创建新任务
+        var retryTask = new QueryTask
+        {
+            FileName = SelectedTask.FileName,
+            Sql = SelectedTask.Sql,
+            Parameters = SelectedTask.Parameters.ToList(),
+            DatabaseConfigId = SelectedTask.DatabaseConfigId,
+            DatabaseName = SelectedTask.DatabaseName,
+            FolderConfigId = SelectedTask.FolderConfigId,
+            FolderPath = SelectedTask.FolderPath
+        };
+
+        // 加入队列顶部并提交执行
+        Tasks.Insert(0, retryTask);
+        await _taskExecutorService.SubmitAsync(retryTask);
+        StatusMessage = $"已重试任务: {retryTask.FileName}";
     }
 
     /// <summary>

@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <AvaloniaResource Include="Assets\icon.png" />
+    <EmbeddedResource Include="Assets\SqlSyntax.xshd" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +30,9 @@
     <!-- Semi.Avalonia 主题 -->
     <PackageReference Include="Semi.Avalonia" Version="12.0.1" />
     <PackageReference Include="Semi.Avalonia.DataGrid" Version="12.0.0" />
+
+    <!-- SQL 编辑器 -->
+    <PackageReference Include="Avalonia.AvaloniaEdit" Version="12.0.0" />
 
     <!-- MVVM -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />

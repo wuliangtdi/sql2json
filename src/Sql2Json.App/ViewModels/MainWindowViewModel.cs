@@ -1,5 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Sql2Json.Core.Enums;
+using Sql2Json.Core.Models;
 using Sql2Json.Core.Services;
 
 namespace Sql2Json.App.ViewModels;
@@ -10,6 +12,7 @@ namespace Sql2Json.App.ViewModels;
 public partial class MainWindowViewModel : ObservableObject
 {
     private readonly IConfigService _configService;
+    private readonly ITaskExecutorService _taskExecutorService;
 
     /// <summary>
     /// 查询面板 ViewModel
@@ -42,8 +45,21 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private int _selectedNavIndex;
 
+    /// <summary>
+    /// 通知消息（任务完成时显示）
+    /// </summary>
+    [ObservableProperty]
+    private string? _notificationMessage;
+
+    /// <summary>
+    /// 是否显示通知
+    /// </summary>
+    [ObservableProperty]
+    private bool _isNotificationVisible;
+
     public MainWindowViewModel(
         IConfigService configService,
+        ITaskExecutorService taskExecutorService,
         QueryViewModel queryViewModel,
         TaskListViewModel taskListViewModel,
         DatabaseConfigViewModel databaseConfigViewModel,
@@ -51,11 +67,32 @@ public partial class MainWindowViewModel : ObservableObject
         SettingsViewModel settingsViewModel)
     {
         _configService = configService;
+        _taskExecutorService = taskExecutorService;
         QueryViewModel = queryViewModel;
         TaskListViewModel = taskListViewModel;
         DatabaseConfigViewModel = databaseConfigViewModel;
         FolderConfigViewModel = folderConfigViewModel;
         SettingsViewModel = settingsViewModel;
+
+        // 订阅任务完成事件，显示通知
+        _taskExecutorService.TaskCompleted += OnTaskCompleted;
+    }
+
+    /// <summary>
+    /// 任务完成时显示通知（3 秒后自动消失）
+    /// </summary>
+    private void OnTaskCompleted(QueryTask task)
+    {
+        var statusText = task.Status == QueryTaskStatus.Completed ? "✓ 完成" : "✕ 失败";
+        NotificationMessage = $"{statusText}: {task.FileName}.json";
+        IsNotificationVisible = true;
+
+        // 3 秒后自动隐藏
+        _ = Task.Delay(3000).ContinueWith(_ =>
+        {
+            IsNotificationVisible = false;
+            NotificationMessage = null;
+        });
     }
 
     /// <summary>

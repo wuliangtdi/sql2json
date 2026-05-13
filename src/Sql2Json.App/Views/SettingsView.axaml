@@ -50,6 +50,15 @@
                 </Border>
             </StackPanel>
 
+            <!-- 外观 -->
+            <StackPanel Spacing="10">
+                <TextBlock Text="外观" FontSize="14" FontWeight="Medium" />
+                <Border Padding="16" CornerRadius="8"
+                        Background="{DynamicResource SemiColorFillQuaternary}">
+                    <CheckBox Content="暗色主题" IsChecked="{Binding IsDarkTheme}" />
+                </Border>
+            </StackPanel>
+
             <!-- 保存 -->
             <StackPanel Orientation="Horizontal" Spacing="12">
                 <Button Content="保存设置" Command="{Binding SaveCommand}"

@@ -61,6 +61,19 @@ public partial class QueryViewModel : ObservableObject,
     [ObservableProperty]
     private string _fileName = string.Empty;
 
+    // ===== 导出格式 =====
+
+    /// <summary>
+    /// 当前选择的导出格式
+    /// </summary>
+    [ObservableProperty]
+    private ExportFormat _selectedExportFormat = ExportFormat.Json;
+
+    /// <summary>
+    /// 可选的导出格式列表
+    /// </summary>
+    public ExportFormat[] AvailableExportFormats { get; } = Enum.GetValues<ExportFormat>();
+
     // ===== 参数化查询 =====
 
     /// <summary>
@@ -240,7 +253,8 @@ public partial class QueryViewModel : ObservableObject,
             DatabaseConfigId = SelectedDatabase!.Id,
             DatabaseName = SelectedDatabase.Name,
             FolderConfigId = SelectedFolder!.Id,
-            FolderPath = SelectedFolder.Path
+            FolderPath = SelectedFolder.Path,
+            ExportFormat = SelectedExportFormat
         };
 
         // 加入任务列表并提交执行

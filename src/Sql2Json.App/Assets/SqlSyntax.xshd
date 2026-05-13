@@ -1,0 +1,204 @@
+<?xml version="1.0"?>
+<!-- SQL 语法高亮定义文件，用于 AvaloniaEdit -->
+<SyntaxDefinition name="SQL" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+  <Color name="Comment" foreground="#6A9955" />
+  <Color name="String" foreground="#CE9178" />
+  <Color name="Keyword" foreground="#569CD6" fontWeight="bold" />
+  <Color name="Function" foreground="#DCDCAA" />
+  <Color name="Number" foreground="#B5CEA8" />
+  <Color name="Operator" foreground="#D4D4D4" />
+  <Color name="Parameter" foreground="#9CDCFE" />
+
+  <RuleSet>
+    <!-- 单行注释 -->
+    <Span color="Comment" begin="--" />
+    <!-- 多行注释 -->
+    <Span color="Comment" multiline="true">
+      <Begin>/\*</Begin>
+      <End>\*/</End>
+    </Span>
+
+    <!-- 字符串 -->
+    <Span color="String">
+      <Begin>'</Begin>
+      <End>'</End>
+    </Span>
+
+    <!-- 参数（@开头） -->
+    <Rule color="Parameter">@[\w]+</Rule>
+
+    <!-- 数字 -->
+    <Rule color="Number">\b\d+\.?\d*\b</Rule>
+
+    <!-- SQL 关键字 -->
+    <Keywords color="Keyword">
+      <Word>SELECT</Word>
+      <Word>FROM</Word>
+      <Word>WHERE</Word>
+      <Word>AND</Word>
+      <Word>OR</Word>
+      <Word>NOT</Word>
+      <Word>IN</Word>
+      <Word>EXISTS</Word>
+      <Word>BETWEEN</Word>
+      <Word>LIKE</Word>
+      <Word>IS</Word>
+      <Word>NULL</Word>
+      <Word>AS</Word>
+      <Word>ON</Word>
+      <Word>JOIN</Word>
+      <Word>LEFT</Word>
+      <Word>RIGHT</Word>
+      <Word>INNER</Word>
+      <Word>OUTER</Word>
+      <Word>CROSS</Word>
+      <Word>FULL</Word>
+      <Word>INSERT</Word>
+      <Word>INTO</Word>
+      <Word>VALUES</Word>
+      <Word>UPDATE</Word>
+      <Word>SET</Word>
+      <Word>DELETE</Word>
+      <Word>CREATE</Word>
+      <Word>ALTER</Word>
+      <Word>DROP</Word>
+      <Word>TABLE</Word>
+      <Word>INDEX</Word>
+      <Word>VIEW</Word>
+      <Word>PROCEDURE</Word>
+      <Word>FUNCTION</Word>
+      <Word>TRIGGER</Word>
+      <Word>DATABASE</Word>
+      <Word>SCHEMA</Word>
+      <Word>ORDER</Word>
+      <Word>BY</Word>
+      <Word>GROUP</Word>
+      <Word>HAVING</Word>
+      <Word>UNION</Word>
+      <Word>ALL</Word>
+      <Word>DISTINCT</Word>
+      <Word>TOP</Word>
+      <Word>LIMIT</Word>
+      <Word>OFFSET</Word>
+      <Word>FETCH</Word>
+      <Word>NEXT</Word>
+      <Word>ROWS</Word>
+      <Word>ONLY</Word>
+      <Word>ASC</Word>
+      <Word>DESC</Word>
+      <Word>CASE</Word>
+      <Word>WHEN</Word>
+      <Word>THEN</Word>
+      <Word>ELSE</Word>
+      <Word>END</Word>
+      <Word>IF</Word>
+      <Word>BEGIN</Word>
+      <Word>DECLARE</Word>
+      <Word>WITH</Word>
+      <Word>NOLOCK</Word>
+      <Word>PRIMARY</Word>
+      <Word>KEY</Word>
+      <Word>FOREIGN</Word>
+      <Word>REFERENCES</Word>
+      <Word>CONSTRAINT</Word>
+      <Word>DEFAULT</Word>
+      <Word>CHECK</Word>
+      <Word>UNIQUE</Word>
+      <Word>EXEC</Word>
+      <Word>EXECUTE</Word>
+      <Word>GO</Word>
+      <Word>USE</Word>
+      <Word>GRANT</Word>
+      <Word>REVOKE</Word>
+      <Word>DENY</Word>
+      <Word>COMMIT</Word>
+      <Word>ROLLBACK</Word>
+      <Word>TRANSACTION</Word>
+      <Word>SAVE</Word>
+      <Word>TRUNCATE</Word>
+      <!-- 小写也匹配 -->
+      <Word>select</Word>
+      <Word>from</Word>
+      <Word>where</Word>
+      <Word>and</Word>
+      <Word>or</Word>
+      <Word>not</Word>
+      <Word>in</Word>
+      <Word>exists</Word>
+      <Word>between</Word>
+      <Word>like</Word>
+      <Word>is</Word>
+      <Word>null</Word>
+      <Word>as</Word>
+      <Word>on</Word>
+      <Word>join</Word>
+      <Word>left</Word>
+      <Word>right</Word>
+      <Word>inner</Word>
+      <Word>outer</Word>
+      <Word>cross</Word>
+      <Word>full</Word>
+      <Word>insert</Word>
+      <Word>into</Word>
+      <Word>values</Word>
+      <Word>update</Word>
+      <Word>set</Word>
+      <Word>delete</Word>
+      <Word>order</Word>
+      <Word>by</Word>
+      <Word>group</Word>
+      <Word>having</Word>
+      <Word>union</Word>
+      <Word>all</Word>
+      <Word>distinct</Word>
+      <Word>top</Word>
+      <Word>limit</Word>
+      <Word>offset</Word>
+      <Word>asc</Word>
+      <Word>desc</Word>
+      <Word>case</Word>
+      <Word>when</Word>
+      <Word>then</Word>
+      <Word>else</Word>
+      <Word>end</Word>
+      <Word>with</Word>
+      <Word>nolock</Word>
+    </Keywords>
+
+    <!-- 常用函数 -->
+    <Keywords color="Function">
+      <Word>COUNT</Word>
+      <Word>SUM</Word>
+      <Word>AVG</Word>
+      <Word>MAX</Word>
+      <Word>MIN</Word>
+      <Word>CAST</Word>
+      <Word>CONVERT</Word>
+      <Word>ISNULL</Word>
+      <Word>COALESCE</Word>
+      <Word>GETDATE</Word>
+      <Word>DATEADD</Word>
+      <Word>DATEDIFF</Word>
+      <Word>LEN</Word>
+      <Word>SUBSTRING</Word>
+      <Word>REPLACE</Word>
+      <Word>TRIM</Word>
+      <Word>UPPER</Word>
+      <Word>LOWER</Word>
+      <Word>ROW_NUMBER</Word>
+      <Word>RANK</Word>
+      <Word>DENSE_RANK</Word>
+      <Word>OVER</Word>
+      <Word>PARTITION</Word>
+      <Word>count</Word>
+      <Word>sum</Word>
+      <Word>avg</Word>
+      <Word>max</Word>
+      <Word>min</Word>
+      <Word>cast</Word>
+      <Word>convert</Word>
+      <Word>isnull</Word>
+      <Word>coalesce</Word>
+    </Keywords>
+  </RuleSet>
+</SyntaxDefinition>

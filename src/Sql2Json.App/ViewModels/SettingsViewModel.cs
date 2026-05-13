@@ -1,3 +1,5 @@
+using Avalonia;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Sql2Json.Core.Models;
@@ -7,7 +9,7 @@ namespace Sql2Json.App.ViewModels;
 
 /// <summary>
 /// 设置 ViewModel
-/// 管理应用全局设置（JSON 格式选项、并发数等）
+/// 管理应用全局设置（JSON 格式选项、并发数、主题等）
 /// </summary>
 public partial class SettingsViewModel : ObservableObject
 {
@@ -51,6 +53,12 @@ public partial class SettingsViewModel : ObservableObject
     private int _previewMaxRows = 100;
 
     /// <summary>
+    /// 是否使用暗色主题
+    /// </summary>
+    [ObservableProperty]
+    private bool _isDarkTheme;
+
+    /// <summary>
     /// 保存状态提示
     /// </summary>
     [ObservableProperty]
@@ -74,6 +82,40 @@ public partial class SettingsViewModel : ObservableObject
         JsonCamelCase = settings.JsonCamelCase;
         MaxConcurrency = settings.MaxConcurrency;
         PreviewMaxRows = settings.PreviewMaxRows;
+        IsDarkTheme = settings.IsDarkTheme;
+
+        // 启动时应用保存的主题
+        ApplyTheme(IsDarkTheme);
+    }
+
+    /// <summary>
+    /// 切换暗色主题时立即生效
+    /// </summary>
+    partial void OnIsDarkThemeChanged(bool value)
+    {
+        ApplyTheme(value);
+    }
+
+    /// <summary>
+    /// 应用主题到 Avalonia 应用
+    /// </summary>
+    private static void ApplyTheme(bool isDark)
+    {
+        if (Application.Current != null)
+        {
+            Application.Current.RequestedThemeVariant = isDark
+                ? ThemeVariant.Dark
+                : ThemeVariant.Light;
+        }
+    }
+
+    /// <summary>
+    /// 快捷切换主题（导航栏按钮调用）
+    /// </summary>
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        IsDarkTheme = !IsDarkTheme;
     }
 
     /// <summary>
@@ -89,7 +131,8 @@ public partial class SettingsViewModel : ObservableObject
             JsonIndentSize = JsonIndentSize,
             JsonCamelCase = JsonCamelCase,
             MaxConcurrency = MaxConcurrency,
-            PreviewMaxRows = PreviewMaxRows
+            PreviewMaxRows = PreviewMaxRows,
+            IsDarkTheme = IsDarkTheme
         };
 
         await _configService.UpdateAppSettingsAsync(settings);

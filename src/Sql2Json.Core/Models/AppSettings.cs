@@ -39,4 +39,14 @@ public class AppSettings
     /// 结果预览最大行数
     /// </summary>
     public int PreviewMaxRows { get; set; } = 100;
+
+    /// <summary>
+    /// 是否使用暗色主题
+    /// </summary>
+    public bool IsDarkTheme { get; set; }
+
+    /// <summary>
+    /// 任务完成时是否发送通知（true=通知，false=静默）
+    /// </summary>
+    public bool EnableNotification { get; set; } = true;
 }

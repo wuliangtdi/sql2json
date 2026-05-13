@@ -77,6 +77,8 @@
             <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="6" Margin="0,8">
                 <Button Content="导出选中" Command="{Binding ExportSelectedCommand}"
                         Classes="Primary" FontSize="12" Padding="12,6" />
+                <Button Content="重试" Command="{Binding RetrySelectedCommand}"
+                        FontSize="12" Padding="10,6" />
                 <Button Content="取消" Command="{Binding CancelSelectedCommand}"
                         Classes="Tertiary" FontSize="12" Padding="10,6" />
                 <Button Content="移除" Command="{Binding RemoveSelectedCommand}"

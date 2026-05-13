@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Sql2Json.App.ViewModels"
+             xmlns:aedit="using:AvaloniaEdit"
              x:Class="Sql2Json.App.Views.QueryView"
              x:DataType="vm:QueryViewModel">
 
@@ -30,8 +31,8 @@
                 </ComboBox>
             </StackPanel>
 
-            <!-- 文件夹 + 文件名 横排 -->
-            <Grid ColumnDefinitions="*,12,*">
+            <!-- 文件夹 + 格式 + 文件名 横排 -->
+            <Grid ColumnDefinitions="*,8,Auto,8,*">
                 <StackPanel Grid.Column="0" Spacing="3">
                     <TextBlock Text="输出文件夹" FontSize="11" FontWeight="Medium" Opacity="0.6" />
                     <ComboBox ItemsSource="{Binding FolderConfigs}"
@@ -46,16 +47,14 @@
                     </ComboBox>
                 </StackPanel>
                 <StackPanel Grid.Column="2" Spacing="3">
+                    <TextBlock Text="格式" FontSize="11" FontWeight="Medium" Opacity="0.6" />
+                    <ComboBox ItemsSource="{Binding AvailableExportFormats}"
+                              SelectedItem="{Binding SelectedExportFormat}"
+                              Width="90" />
+                </StackPanel>
+                <StackPanel Grid.Column="4" Spacing="3">
                     <TextBlock Text="文件名" FontSize="11" FontWeight="Medium" Opacity="0.6" />
-                    <DockPanel>
-                        <Border DockPanel.Dock="Right" Padding="8,0"
-                                Background="{DynamicResource SemiColorFillTertiary}"
-                                CornerRadius="0,4,4,0" VerticalAlignment="Stretch">
-                            <TextBlock Text=".json" VerticalAlignment="Center" Opacity="0.5"
-                                       FontSize="12" />
-                        </Border>
-                        <TextBox Text="{Binding FileName}" PlaceholderText="文件名（必填）" />
-                    </DockPanel>
+                    <TextBox Text="{Binding FileName}" PlaceholderText="文件名（必填）" />
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -64,17 +63,17 @@
         <TextBlock Grid.Row="2" Text="SQL 语句" FontSize="11" FontWeight="Medium"
                    Opacity="0.6" Margin="0,0,0,4" />
 
-        <!-- Row 3: SQL 输入框（占满剩余空间） -->
-        <TextBox Grid.Row="3"
-                 Text="{Binding SqlText}"
-                 AcceptsReturn="True"
-                 TextWrapping="Wrap"
-                 VerticalAlignment="Stretch"
-                 VerticalContentAlignment="Top"
-                 PlaceholderText="输入 SQL 语句，支持多个 SELECT（分号分隔）&#x0a;支持参数化查询：SELECT * FROM Users WHERE Id = @id"
+        <!-- Row 3: SQL 编辑器（带语法高亮，占满剩余空间） -->
+        <aedit:TextEditor Grid.Row="3"
+                 x:Name="SqlEditor"
+                 ShowLineNumbers="True"
                  FontFamily="Cascadia Code, Consolas, 'Courier New', monospace"
                  FontSize="13"
-                 Margin="0,0,0,10" />
+                 VerticalAlignment="Stretch"
+                 Margin="0,0,0,10"
+                 BorderThickness="1"
+                 BorderBrush="{DynamicResource SemiColorBorder}"
+                 CornerRadius="4" />
 
         <!-- Row 4: 参数区域 -->
         <StackPanel Grid.Row="4" Spacing="4" Margin="0,0,0,12">

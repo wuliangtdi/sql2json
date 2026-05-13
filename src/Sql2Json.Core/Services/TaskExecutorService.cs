@@ -13,14 +13,21 @@ public class TaskExecutorService : ITaskExecutorService
     private readonly IDatabaseService _databaseService;
     private readonly IConfigService _configService;
     private readonly IJsonExportService _jsonExportService;
+    private readonly CsvExportService _csvExportService;
+    private readonly ExcelExportService _excelExportService;
     private volatile SemaphoreSlim _semaphore;
     private int _maxConcurrency;
+
+    /// <inheritdoc/>
+    public event Action<QueryTask>? TaskCompleted;
 
     public TaskExecutorService(IDatabaseService databaseService, IConfigService configService, IJsonExportService jsonExportService)
     {
         _databaseService = databaseService;
         _configService = configService;
         _jsonExportService = jsonExportService;
+        _csvExportService = new CsvExportService();
+        _excelExportService = new ExcelExportService();
         _maxConcurrency = 5;
         _semaphore = new SemaphoreSlim(_maxConcurrency);
     }
@@ -92,20 +99,34 @@ public class TaskExecutorService : ITaskExecutorService
                 task.Result = result;
                 task.ElapsedMilliseconds = result.ElapsedMilliseconds;
 
-                // 自动导出 JSON 文件到目标文件夹
-                task.ProgressMessage = "正在导出 JSON...";
+                // 根据导出格式调用对应的导出服务
+                task.ProgressMessage = "正在导出文件...";
                 var settings = await _configService.GetAppSettingsAsync();
-                var exportOptions = new JsonExportOptions
+
+                switch (task.ExportFormat)
                 {
-                    Indented = settings.JsonIndented,
-                    UseBom = settings.JsonUseBom,
-                    IndentSize = settings.JsonIndentSize,
-                    CamelCasePropertyNames = settings.JsonCamelCase
-                };
-                await _jsonExportService.ExportAsync(result, task.FolderPath, task.FileName, exportOptions);
+                    case ExportFormat.Csv:
+                        _csvExportService.Export(result, task.FolderPath, task.FileName);
+                        break;
+                    case ExportFormat.Excel:
+                        _excelExportService.Export(result, task.FolderPath, task.FileName);
+                        break;
+                    case ExportFormat.Json:
+                    default:
+                        var exportOptions = new JsonExportOptions
+                        {
+                            Indented = settings.JsonIndented,
+                            UseBom = settings.JsonUseBom,
+                            IndentSize = settings.JsonIndentSize,
+                            CamelCasePropertyNames = settings.JsonCamelCase
+                        };
+                        await _jsonExportService.ExportAsync(result, task.FolderPath, task.FileName, exportOptions);
+                        break;
+                }
 
                 task.Status = QueryTaskStatus.Completed;
                 task.ProgressMessage = $"完成，共 {result.TotalRows} 行，耗时 {result.ElapsedMilliseconds}ms，已导出";
+                TaskCompleted?.Invoke(task);
             }
             finally
             {
@@ -123,6 +144,7 @@ public class TaskExecutorService : ITaskExecutorService
             task.Status = QueryTaskStatus.Failed;
             task.ErrorMessage = ex.Message;
             task.ProgressMessage = "执行失败";
+            TaskCompleted?.Invoke(task);
         }
     }
 }
