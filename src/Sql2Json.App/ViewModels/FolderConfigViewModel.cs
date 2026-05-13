@@ -58,6 +58,14 @@ public partial class FolderConfigViewModel : ObservableObject
     }
 
     /// <summary>
+    /// 切换选中项时退出编辑模式
+    /// </summary>
+    partial void OnSelectedConfigChanged(FolderConfig? value)
+    {
+        IsEditing = false;
+    }
+
+    /// <summary>
     /// 加载所有文件夹配置
     /// </summary>
     public async Task LoadAsync()

@@ -28,7 +28,8 @@
       "Bash(git tag *)",
       "Bash(taskkill //F //PID 70248)",
       "Bash(taskkill //F //PID 27640)",
-      "Bash(taskkill //F //PID 135016)"
+      "Bash(taskkill //F //PID 135016)",
+      "Bash(taskkill //F //IM \"dotnet.exe\")"
     ]
   }
 }

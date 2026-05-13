@@ -90,6 +90,15 @@ public partial class DatabaseConfigViewModel : ObservableObject
     }
 
     /// <summary>
+    /// 切换选中项时退出编辑模式
+    /// </summary>
+    partial void OnSelectedConfigChanged(DatabaseConfig? value)
+    {
+        IsEditing = false;
+        TestResultMessage = null;
+    }
+
+    /// <summary>
     /// 加载所有数据库配置
     /// </summary>
     public async Task LoadAsync()
