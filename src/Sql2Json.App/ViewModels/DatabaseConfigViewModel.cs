@@ -59,7 +59,7 @@ public partial class DatabaseConfigViewModel : ObservableObject
     /// 编辑中的命令超时时间（秒）
     /// </summary>
     [ObservableProperty]
-    private int _editCommandTimeout = 300;
+    private decimal _editCommandTimeout = 300;
 
     /// <summary>
     /// 连接测试结果信息
@@ -160,9 +160,8 @@ public partial class DatabaseConfigViewModel : ObservableObject
                 Name = EditName.Trim(),
                 DatabaseType = EditDatabaseType,
                 ConnectionString = EditConnectionString.Trim(),
-                CommandTimeout = EditCommandTimeout
-            };
-            await _configService.AddDatabaseConfigAsync(config);
+                CommandTimeout = (int)EditCommandTimeout
+            };            await _configService.AddDatabaseConfigAsync(config);
             savedId = config.Id;
         }
         else
@@ -175,9 +174,8 @@ public partial class DatabaseConfigViewModel : ObservableObject
                 Name = EditName.Trim(),
                 DatabaseType = EditDatabaseType,
                 ConnectionString = EditConnectionString.Trim(),
-                CommandTimeout = EditCommandTimeout
-            };
-            await _configService.UpdateDatabaseConfigAsync(config);
+                CommandTimeout = (int)EditCommandTimeout
+            };            await _configService.UpdateDatabaseConfigAsync(config);
         }
 
         IsEditing = false;

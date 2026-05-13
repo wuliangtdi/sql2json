@@ -70,6 +70,8 @@
                                Opacity="0.4" VerticalAlignment="Center" Margin="8,0,0,0" />
                     <NumericUpDown Value="{Binding EditCommandTimeout}"
                                    Minimum="0" Maximum="7200" Increment="30"
+                                   AllowSpin="True" ShowButtonSpinner="True"
+                                   FormatString="0"
                                    Width="120" HorizontalAlignment="Left" />
                 </DockPanel>
 
