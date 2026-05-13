@@ -29,7 +29,8 @@
       "Bash(taskkill //F //PID 70248)",
       "Bash(taskkill //F //PID 27640)",
       "Bash(taskkill //F //PID 135016)",
-      "Bash(taskkill //F //IM \"dotnet.exe\")"
+      "Bash(taskkill //F //IM \"dotnet.exe\")",
+      "Bash(taskkill //F //PID 36380)"
     ]
   }
 }

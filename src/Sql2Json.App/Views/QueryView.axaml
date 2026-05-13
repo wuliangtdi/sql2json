@@ -1,7 +1,6 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Sql2Json.App.ViewModels"
-             xmlns:aedit="using:AvaloniaEdit"
              x:Class="Sql2Json.App.Views.QueryView"
              x:DataType="vm:QueryViewModel">
 
@@ -63,17 +62,18 @@
         <TextBlock Grid.Row="2" Text="SQL 语句" FontSize="11" FontWeight="Medium"
                    Opacity="0.6" Margin="0,0,0,4" />
 
-        <!-- Row 3: SQL 编辑器（带语法高亮，占满剩余空间） -->
-        <aedit:TextEditor Grid.Row="3"
+        <!-- Row 3: SQL 输入框（占满剩余空间） -->
+        <TextBox Grid.Row="3"
                  x:Name="SqlEditor"
-                 ShowLineNumbers="True"
+                 Text="{Binding SqlText}"
+                 AcceptsReturn="True"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Stretch"
+                 VerticalContentAlignment="Top"
+                 PlaceholderText="输入 SQL 语句，支持多个 SELECT（分号分隔）&#x0a;支持参数化查询：SELECT * FROM Users WHERE Id = @id"
                  FontFamily="Cascadia Code, Consolas, 'Courier New', monospace"
                  FontSize="13"
-                 VerticalAlignment="Stretch"
-                 Margin="0,0,0,10"
-                 BorderThickness="1"
-                 BorderBrush="{DynamicResource SemiColorBorder}"
-                 CornerRadius="4" />
+                 Margin="0,0,0,10" />
 
         <!-- Row 4: 参数区域 -->
         <StackPanel Grid.Row="4" Spacing="4" Margin="0,0,0,12">
