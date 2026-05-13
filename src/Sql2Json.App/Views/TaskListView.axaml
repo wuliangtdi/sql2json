@@ -96,6 +96,8 @@
                              IsReadOnly="True"
                              AcceptsReturn="True"
                              TextWrapping="NoWrap"
+                             VerticalAlignment="Stretch"
+                             VerticalContentAlignment="Top"
                              FontFamily="Cascadia Code, Consolas, 'Courier New', monospace"
                              FontSize="12"
                              Background="{DynamicResource SemiColorFillQuaternary}"
