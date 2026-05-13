@@ -55,7 +55,7 @@
                                 <!-- 任务信息 -->
                                 <StackPanel VerticalAlignment="Center">
                                     <DockPanel>
-                                        <TextBlock Text="{Binding FileName, StringFormat='{}{0}.json'}"
+                                        <TextBlock Text="{Binding FileNameWithExtension}"
                                                    FontWeight="Medium" FontSize="13" />
                                         <TextBlock DockPanel.Dock="Right"
                                                    Text="{Binding DatabaseName}"

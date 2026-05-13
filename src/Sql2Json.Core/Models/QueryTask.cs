@@ -55,6 +55,16 @@ public partial class QueryTask : ObservableObject
     public ExportFormat ExportFormat { get; set; } = ExportFormat.Json;
 
     /// <summary>
+    /// 带扩展名的完整文件名（根据导出格式自动生成）
+    /// </summary>
+    public string FileNameWithExtension => ExportFormat switch
+    {
+        ExportFormat.Csv => $"{FileName}.csv",
+        ExportFormat.Excel => $"{FileName}.xlsx",
+        _ => $"{FileName}.json"
+    };
+
+    /// <summary>
     /// 任务创建时间
     /// </summary>
     public DateTime CreatedAt { get; set; } = DateTime.Now;
